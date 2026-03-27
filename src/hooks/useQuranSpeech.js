@@ -57,7 +57,7 @@ export const useQuranSpeech = () => {
   const stopListening = () => {
     if (recognitionRef.current) {
       recognitionRef.current.stop();
-      setIsListening(false;
+      setIsListening(false);
     }
   };
 

@@ -18,7 +18,7 @@ const MOCK_QURAN = {
 };
 
 function App() {
-  const [activeTab, setActiveTab] = useState('setor'); // Default ke setor untuk tes
+  const [activeTab, setActiveTab] = useState('home'); // Kembali ke beranda
   const [sessionState, setSessionState] = useState('idle');
   const [score, setScore] = useState(null);
   const [showSedekah, setShowSedekah] = useState(false);
@@ -69,6 +69,198 @@ function App() {
 
   const renderTabContent = () => {
     switch (activeTab) {
+      case 'home':
+        return (
+          <div className="space-y-4 p-4 pb-24">
+            <div className="flex justify-between items-center px-2">
+              <h1 className="text-2xl font-bold text-green-800">At Tahfidz</h1>
+              <div className="flex gap-3">
+                <button className="p-2 bg-white rounded-full shadow-sm text-gray-600"><Bell size={20} /></button>
+                <button className="p-2 bg-white rounded-full shadow-sm text-gray-600"><Settings size={20} /></button>
+              </div>
+            </div>
+
+            {/* Ethical Ads / Sponsorship Banner */}
+            <div className="bg-gradient-to-br from-green-700 to-green-900 rounded-2xl p-5 text-white shadow-lg relative overflow-hidden">
+              <div className="relative z-10 space-y-2">
+                <div className="bg-white/20 w-fit px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">Sponsor Ad</div>
+                <h3 className="font-bold text-lg">Wakaf Quran untuk Pelosok</h3>
+                <p className="text-xs text-green-100">Bantu 1000 santri di pedalaman mendapatkan Mushaf baru.</p>
+                <button className="mt-2 bg-yellow-500 text-green-900 px-4 py-2 rounded-xl text-xs font-bold hover:bg-yellow-400 transition-colors flex items-center gap-2">
+                  <DollarSign size={14} /> Beri Kontribusi
+                </button>
+              </div>
+              <Heart className="absolute -right-4 -bottom-4 opacity-10 rotate-12" size={120} />
+            </div>
+
+            {/* Social Media Feed for Hufadz */}
+            <h2 className="font-bold text-gray-700 px-2 pt-2">Kabar Hufadz</h2>
+            {[1, 2].map((i) => (
+              <div key={i} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center font-bold text-green-800 overflow-hidden">
+                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i === 1 ? 'Ahmad' : 'Siti'}`} alt="avatar" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-sm">{i === 1 ? 'Hamba Allah (Karyawan)' : 'Bunda Sarah'}</p>
+                    <p className="text-[10px] text-gray-400">Baru saja menyelesaikan Juz 30</p>
+                  </div>
+                  <div className="text-[10px] text-gray-500 italic">3 menit lalu</div>
+                </div>
+                <p className="text-sm text-gray-700">
+                  {i === 1 
+                    ? "Alhamdulillah, berkat fitur AI At Tahfidz jadi lebih percaya diri buat murajaah di kantor saat istirahat. Mumtaz!" 
+                    : "Masya Allah, fitur suaranya Ustadzah Humaira membantu sekali buat koreksi bacaan anak-anak di rumah. Jazakallah!"}
+                </p>
+                <div className="flex gap-4 pt-3 border-t border-gray-50">
+                  <button className="flex items-center gap-1.5 text-xs font-medium text-gray-500"><Heart size={14} /> 42</button>
+                  <button className="flex items-center gap-1.5 text-xs font-medium text-gray-500"><MessageCircle size={14} /> 8</button>
+                  <button className="flex items-center gap-1.5 text-xs font-medium text-gray-500"><Share2 size={14} /> Share</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+
+      case 'learn':
+        return (
+          <div className="p-4 pb-24 space-y-4">
+            <div className="flex items-center justify-between">
+              <h1 className="text-xl font-bold text-gray-800">Mode Belajar</h1>
+              <div className="flex gap-2">
+                 <button className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold">Ubah Qari</button>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm space-y-6">
+              <div className="flex justify-between items-start border-b border-gray-100 pb-3">
+                <div>
+                  <h2 className="text-2xl font-black text-green-800">{MOCK_QURAN.surah}</h2>
+                  <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Target: Ayat {MOCK_QURAN.ayat_range}</p>
+                </div>
+                <button 
+                  onClick={() => setIsPlayingAudio(!isPlayingAudio)}
+                  className={`p-3 rounded-full transition-all ${isPlayingAudio ? 'bg-red-100 text-red-600 scale-110' : 'bg-green-600 text-white shadow-md'}`}
+                >
+                  {isPlayingAudio ? <Pause size={24} /> : <Play size={24} />}
+                </button>
+              </div>
+              
+              <div className="space-y-8 py-2">
+                {MOCK_QURAN.text.map(item => (
+                  <div key={item.id} className="space-y-3">
+                    <p className="text-right text-3xl leading-relaxed font-serif text-gray-800" dir="rtl">
+                      {item.arabic} <span className="text-green-600 font-sans text-xl">﴿{item.id}﴾</span>
+                    </p>
+                    <div className="bg-gray-50 p-3 rounded-xl">
+                       <p className="text-xs text-gray-500 leading-relaxed font-medium italic">{item.indo}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex gap-3">
+              <AlertCircle className="text-blue-600 shrink-0" />
+              <p className="text-xs text-blue-700 leading-relaxed">
+                <b>Tips At Tahfidz:</b> Dengarkan audio Qari 3x sambil melihat terjemah sebelum memulai setoran buta (Blind Mode).
+              </p>
+            </div>
+
+            <button 
+              onClick={() => setActiveTab('setor')}
+              className="w-full bg-green-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-green-200 flex items-center justify-center gap-3 active:scale-95 transition-transform"
+            >
+              <Mic size={20} /> Mulai Setoran (Blind Mode)
+            </button>
+          </div>
+        );
+
+      case 'juz':
+        return (
+          <div className="p-4 pb-24 space-y-4">
+             <h1 className="text-xl font-bold text-gray-800">Progres Mutqin</h1>
+             
+             <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 flex items-center gap-6">
+                <div className="relative w-24 h-24 shrink-0">
+                   <svg className="w-full h-full transform -rotate-90">
+                      <circle cx="48" cy="48" r="42" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-gray-100" />
+                      <circle cx="48" cy="48" r="42" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-green-600" strokeDasharray="263.8" strokeDashoffset="52.7" />
+                   </svg>
+                   <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="font-black text-xl leading-none">80%</span>
+                      <span className="text-[8px] font-bold text-gray-400 uppercase tracking-tighter">Selesai</span>
+                   </div>
+                </div>
+                <div className="space-y-1">
+                   <p className="font-black text-lg text-gray-800 leading-tight">Juz 30 (Amma)</p>
+                   <p className="text-xs text-gray-500 font-medium">24 dari 30 Surah Lulus AI</p>
+                   <div className="pt-2 flex gap-1">
+                      {[1,2,3,4,5].map(i => <Star key={i} size={14} className={i <= 4 ? "text-yellow-400 fill-yellow-400" : "text-gray-100"} />)}
+                   </div>
+                </div>
+             </div>
+
+             <div className="flex justify-between items-center px-1 pt-2">
+                <h2 className="font-bold text-gray-700">Daftar Juz Hafalan</h2>
+                <button className="text-[10px] font-bold text-green-600 uppercase">Lihat Semua</button>
+             </div>
+             
+             {[30, 29, 28, 27].map(juz => (
+               <div key={juz} className="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center group active:bg-green-50 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg ${juz === 30 ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                       {juz}
+                    </div>
+                    <div>
+                      <p className="font-bold text-gray-800">Juz {juz}</p>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{juz === 30 ? 'Siap Talaqqi' : 'Tahap Mandiri'}</p>
+                    </div>
+                  </div>
+                  {juz === 30 ? (
+                    <button className="bg-yellow-500 text-green-900 text-[10px] px-3 py-2 rounded-xl font-black uppercase tracking-wider shadow-sm">Ujian Ustadz</button>
+                  ) : (
+                    <ChevronRight className="text-gray-300" />
+                  )}
+               </div>
+             ))}
+          </div>
+        );
+
+      case 'profile':
+        return (
+          <div className="p-4 pb-24 text-center space-y-6">
+             <div className="relative mx-auto w-32 h-32 pt-8">
+                <div className="w-24 h-24 bg-green-200 rounded-[2rem] mx-auto overflow-hidden border-4 border-white shadow-lg">
+                   <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmad" alt="profile" />
+                </div>
+                <div className="absolute bottom-2 right-4 bg-green-600 text-white p-1.5 rounded-full border-4 border-white">
+                   <Award size={16} />
+                </div>
+             </div>
+             
+             <div className="space-y-1">
+                <h2 className="text-2xl font-black text-gray-800">Ahmad Syarif</h2>
+                <p className="text-sm text-gray-500 font-medium">Pegawai Swasta • Hufadz Sejak 2024</p>
+             </div>
+
+             <div className="grid grid-cols-3 gap-3">
+                <div className="bg-white p-3 rounded-2xl border border-gray-100">
+                   <p className="text-xl font-black text-green-700">12</p>
+                   <p className="text-[10px] font-bold text-gray-400 uppercase">Streak</p>
+                </div>
+                <div className="bg-white p-3 rounded-2xl border border-gray-100">
+                   <p className="text-xl font-black text-green-700">4.8</p>
+                   <p className="text-[10px] font-bold text-gray-400 uppercase">Avg Score</p>
+                </div>
+                <div className="bg-white p-3 rounded-2xl border border-gray-100">
+                   <p className="text-xl font-black text-green-700">2</p>
+                   <p className="text-[10px] font-bold text-gray-400 uppercase">Juz Mutqin</p>
+                </div>
+             </div>
+          </div>
+        );
+
       case 'setor':
         return (
           <div className="flex flex-col h-full bg-white p-6 pb-24">
@@ -185,8 +377,74 @@ function App() {
 
   return (
     <div className="max-w-md mx-auto h-[800px] bg-gray-50 shadow-2xl rounded-[3.5rem] border-[12px] border-gray-900 overflow-hidden relative font-sans flex flex-col text-gray-800 select-none">
-       <div className="flex-1 overflow-y-auto bg-gray-50">
+      {/* iOS Style Status Bar */}
+      <div className="bg-white h-12 flex justify-between px-10 items-end pb-2 text-[12px] font-bold">
+        <span>9:41</span>
+        <div className="flex gap-1.5 items-center">
+          <div className="w-4 h-2 bg-gray-300 rounded-[2px] relative">
+             <div className="absolute right-[-2px] top-0.5 w-1 h-1 bg-gray-300 rounded-full"></div>
+             <div className="absolute inset-0 bg-green-500 w-[60%] m-[1px] rounded-[1px]"></div>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto bg-gray-50">
         {renderTabContent()}
+      </div>
+
+      {/* Syukur/Sedekah Modal */}
+      {showSedekah && (
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-end justify-center animate-in fade-in duration-300">
+          <div className="bg-white w-full rounded-t-[3rem] p-8 pb-12 space-y-6 animate-in slide-in-from-bottom duration-500 shadow-[0_-20px_50px_rgba(0,0,0,0.2)]">
+             <div className="flex justify-center">
+                <div className="w-16 h-1.5 bg-gray-100 rounded-full"></div>
+             </div>
+             <button onClick={() => setShowSedekah(false)} className="absolute top-6 right-8 text-gray-300 hover:text-gray-600"><X size={24} /></button>
+             <div className="text-center space-y-3">
+                <div className="mx-auto w-24 h-24 bg-yellow-50 rounded-[2.5rem] flex items-center justify-center text-yellow-500 mb-2 rotate-3"><Heart size={48} fill="currentColor" /></div>
+                <h3 className="text-2xl font-black text-gray-800 tracking-tight">Wujudkan Rasa Syukur</h3>
+                <p className="text-sm text-gray-500 leading-relaxed px-4">Alhamdulillah, hafalanmu <b>{MOCK_QURAN.surah}</b> sangat lancar hari ini. Sempurnakan dengan sedekah?</p>
+             </div>
+             <div className="grid grid-cols-1 gap-4 pt-2">
+                <button className="w-full bg-green-700 text-white py-5 rounded-[2rem] font-black text-lg shadow-xl shadow-green-100 flex items-center justify-center gap-3 hover:bg-green-800 transition-all"><DollarSign size={20} /> Sedekah Sekarang</button>
+             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bottom Navigation Bar */}
+      <div className="h-24 bg-white/80 backdrop-blur-md border-t border-gray-100 flex justify-around items-center px-6 pb-6 relative z-50">
+        <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center transition-all ${activeTab === 'home' ? 'text-green-700 scale-110' : 'text-gray-300 hover:text-gray-500'}`}>
+          <Home size={22} fill={activeTab === 'home' ? "currentColor" : "none"} />
+          <span className="text-[9px] font-black mt-1 uppercase tracking-tighter">Sosial</span>
+        </button>
+        <button onClick={() => setActiveTab('learn')} className={`flex flex-col items-center transition-all ${activeTab === 'learn' ? 'text-green-700 scale-110' : 'text-gray-300 hover:text-gray-500'}`}>
+          <BookOpen size={22} fill={activeTab === 'learn' ? "currentColor" : "none"} />
+          <span className="text-[9px] font-black mt-1 uppercase tracking-tighter">Belajar</span>
+        </button>
+        
+        {/* Floating Center Mic Button */}
+        <div className="relative -top-6">
+          <div className="absolute inset-0 bg-green-700 rounded-full blur-xl opacity-20 scale-150"></div>
+          <button onClick={() => setActiveTab('setor')} className={`w-16 h-16 rounded-[2rem] flex items-center justify-center shadow-2xl transition-all duration-500 transform active:scale-90 ${activeTab === 'setor' ? 'bg-green-700 text-white rotate-[360deg]' : 'bg-white text-gray-400 rotate-0'}`}>
+            <Mic size={30} strokeWidth={2.5} />
+          </button>
+        </div>
+
+        <button onClick={() => setActiveTab('juz')} className={`flex flex-col items-center transition-all ${activeTab === 'juz' ? 'text-green-700 scale-110' : 'text-gray-300 hover:text-gray-500'}`}>
+          <Award size={22} fill={activeTab === 'juz' ? "currentColor" : "none"} />
+          <span className="text-[9px] font-black mt-1 uppercase tracking-tighter">Ujian</span>
+        </button>
+        <button onClick={() => setActiveTab('profile')} className={`flex flex-col items-center transition-all ${activeTab === 'profile' ? 'text-green-700 scale-110' : 'text-gray-300 hover:text-gray-500'}`}>
+          <User size={22} fill={activeTab === 'profile' ? "currentColor" : "none"} />
+          <span className="text-[9px] font-black mt-1 uppercase tracking-tighter">Profil</span>
+        </button>
+      </div>
+
+      {/* iPhone Dynamic Island */}
+      <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-32 h-8 bg-gray-900 rounded-3xl z-[100] flex items-center justify-center">
+         <div className="w-12 h-1 bg-gray-800 rounded-full mr-12"></div>
+         <div className="w-3 h-3 bg-gray-800 rounded-full"></div>
       </div>
     </div>
   )
