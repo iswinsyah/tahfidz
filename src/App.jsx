@@ -1,5 +1,5 @@
 // Komponen Utama Aplikasi At Tahfidz
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Home, BookOpen, Mic, Award, User, Heart, Share2, Play, Pause, Search,
   CheckCircle, AlertCircle, Star, Bell, Settings, DollarSign,
@@ -11,6 +11,7 @@ import { quranData } from './data/QuranData';
 
 const MOCK_QURAN = {
   surah: "Al-Mulk",
+  surahNumber: 67,
   ayat_range: "1-2",
   text: [
     { id: 1, arabic: "تَبَٰرَكَ ٱلَّذِى بِيَدِهِ ٱلْمُلْكُ وَهُوَ عَلَىٰ كُلِّ شَىْءٍ قَدِيرٌ", indo: "Mahasuci Allah yang menguasai kerajaan..." },
@@ -27,9 +28,48 @@ function App() {
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [quranView, setQuranView] = useState('surah'); // 'surah' atau 'juz'
   const [searchQuery, setSearchQuery] = useState(''); // State pencarian
+  const [selectedQari, setSelectedQari] = useState('Husary_128kbps'); // Qari default untuk pemula
+  const [playingAyah, setPlayingAyah] = useState(null); // Ayat yang sedang diputar
   const [selectedLearnItem, setSelectedLearnItem] = useState(null); // Menyimpan surah/juz yang dipilih
 
   const { transcript, isListening, startListening, stopListening, error } = useQuranSpeech();
+
+  const audioRef = useRef(null);
+
+  // Bersihkan audio saat komponen tertutup atau pindah tab
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
+  }, [activeTab]);
+
+  const handlePlayAyah = (surahNum, ayahNum) => {
+    // Jika ayat yang sama diklik saat sedang play, maka pause
+    if (playingAyah === ayahNum && isPlayingAudio) {
+      audioRef.current?.pause();
+      setIsPlayingAudio(false);
+      setPlayingAyah(null);
+      return;
+    }
+
+    if (audioRef.current) audioRef.current.pause(); // Hentikan audio sebelumnya
+
+    // Format nomor menjadi 3 digit (contoh: Surah 1, Ayat 2 => 001002.mp3)
+    const surahStr = String(surahNum).padStart(3, '0');
+    const ayahStr = String(ayahNum).padStart(3, '0');
+    const audioUrl = `https://everyayah.com/data/${selectedQari}/${surahStr}${ayahStr}.mp3`;
+
+    const newAudio = new Audio(audioUrl);
+    audioRef.current = newAudio;
+    
+    newAudio.onplay = () => { setIsPlayingAudio(true); setPlayingAyah(ayahNum); };
+    newAudio.onended = () => { setIsPlayingAudio(false); setPlayingAyah(null); };
+    newAudio.onerror = () => { alert("Maaf, audio belum tersedia untuk ayat ini."); setIsPlayingAudio(false); setPlayingAyah(null); };
+    
+    newAudio.play();
+  };
 
   const handleStartSetoran = () => {
     if (error) {
@@ -49,6 +89,7 @@ function App() {
       data: {
         ...MOCK_QURAN,
         surah: surah.surahName,
+        surahNumber: surah.surahNumber,
         ayat_range: `1-${surah.verses}`,
       }
     });
@@ -159,13 +200,22 @@ function App() {
         // Jika belum ada surah/juz yang dipilih, tampilkan pesan.
         // Namun, untuk menjaga fungsionalitas, kita fallback ke MOCK_QURAN jika diakses langsung.
         const currentLearnData = selectedLearnItem ? selectedLearnItem.data : MOCK_QURAN;
-        const { surah, ayat_range, text } = currentLearnData;
+        const { surah, surahNumber = 1, ayat_range, text } = currentLearnData;
 
         return (
           <div className="p-4 pb-24 space-y-4">
             <div className="flex items-center justify-between">
               <h1 className="text-xl font-bold text-gray-800">Mode Belajar</h1>
               <div className="flex gap-2">
+                 <select 
+                   value={selectedQari}
+                   onChange={(e) => setSelectedQari(e.target.value)}
+                   className="text-xs bg-white border border-gray-200 text-gray-700 px-2 py-1 rounded-full font-bold outline-none shadow-sm"
+                 >
+                   <option value="Husary_128kbps">Tartil Lambat (Al-Husary)</option>
+                   <option value="Alafasy_128kbps">Irama Sedang (Mishary)</option>
+                   <option value="Abdul_Basit_Murattal_192kbps">Irama Klasik (Abdul Basit)</option>
+                 </select>
                  <button 
                    onClick={() => setActiveTab('quran')}
                    className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold flex items-center gap-1"
@@ -184,7 +234,7 @@ function App() {
                   </p>
                 </div>
                 <button 
-                  onClick={() => setIsPlayingAudio(!isPlayingAudio)}
+                  onClick={() => text.length > 0 && handlePlayAyah(surahNumber, text[0].id)}
                   className={`p-3 rounded-full transition-all ${isPlayingAudio ? 'bg-red-100 text-red-600 scale-110' : 'bg-green-600 text-white shadow-md'}`}
                 >
                   {isPlayingAudio ? <Pause size={24} /> : <Play size={24} />}
@@ -193,13 +243,20 @@ function App() {
               
               <div className="space-y-8 py-2">
                 {text.map(item => (
-                  <div key={item.id} className="space-y-3">
-                    <p className="text-right text-3xl leading-relaxed font-serif text-gray-800" dir="rtl">
-                      {item.arabic} <span className="text-green-600 font-sans text-xl">﴿{item.id}﴾</span>
-                    </p>
-                    <div className="bg-gray-50 p-3 rounded-xl">
-                       <p className="text-xs text-gray-500 leading-relaxed font-medium italic">{item.indo}</p>
+                  <div 
+                    key={item.id} 
+                    onClick={() => handlePlayAyah(surahNumber, item.id)}
+                    className={`space-y-3 p-4 rounded-2xl cursor-pointer transition-all border ${playingAyah === item.id ? 'bg-green-50 border-green-200 shadow-sm' : 'bg-transparent border-transparent hover:bg-gray-50'}`}
+                  >
+                    <div className="flex items-start gap-4 justify-between">
+                      <button className={`mt-2 shrink-0 p-2 rounded-full ${playingAyah === item.id ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-400 hover:text-green-600'}`}>
+                         {playingAyah === item.id ? <Volume2 size={16} className="animate-pulse" /> : <Play size={16} />}
+                      </button>
+                      <p className="text-right text-3xl leading-loose font-serif text-gray-800" dir="rtl">
+                        {item.arabic} <span className="text-green-600 font-sans text-xl">﴿{item.id}﴾</span>
+                      </p>
                     </div>
+                    <p className="text-xs text-gray-500 leading-relaxed font-medium italic bg-white p-3 rounded-xl border border-gray-100">{item.indo}</p>
                   </div>
                 ))}
               </div>
