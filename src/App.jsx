@@ -31,6 +31,7 @@ function App() {
   const [selectedQari, setSelectedQari] = useState('Husary_128kbps'); // Qari default untuk pemula
   const [playingAyah, setPlayingAyah] = useState(null); // Ayat yang sedang diputar
   const [selectedLearnItem, setSelectedLearnItem] = useState(null); // Menyimpan surah/juz yang dipilih
+  const [isLoadingLearnData, setIsLoadingLearnData] = useState(false); // Indikator loading saat ambil data
 
   const { transcript, isListening, startListening, stopListening, error } = useQuranSpeech();
 
@@ -105,20 +106,36 @@ function App() {
     startListening();
   };
 
-  const handleSelectSurah = (surah) => {
-    // Untuk demo, kita akan gunakan data dari MOCK_QURAN
-    // tapi mengganti judulnya sesuai surah yang diklik.
-    // Di aplikasi nyata, kita akan mengambil data ayat dari API.
-    setSelectedLearnItem({
-      type: 'surah',
-      data: {
-        ...MOCK_QURAN,
-        surah: surah.surahName,
-        surahNumber: surah.surahNumber,
-        ayat_range: `1-${surah.verses}`,
-      }
-    });
+  const handleSelectSurah = async (surah) => {
     setActiveTab('learn');
+    setIsLoadingLearnData(true);
+    
+    try {
+      // Memanggil data API EQuran (Kemenag)
+      const response = await fetch(`https://equran.id/api/v2/surat/${surah.surahNumber}`);
+      const result = await response.json();
+      
+      // Menyusun ulang data agar sesuai format aplikasi kita
+      const formattedText = result.data.ayat.map(a => ({
+        id: a.nomorAyat,
+        arabic: a.teksArab,
+        indo: a.teksIndonesia
+      }));
+
+      setSelectedLearnItem({
+        type: 'surah',
+        data: {
+          surah: surah.surahName,
+          surahNumber: surah.surahNumber,
+          ayat_range: `1-${surah.verses}`,
+          text: formattedText
+        }
+      });
+    } catch (err) {
+      alert("Gagal mengambil data surah. Pastikan koneksi internet lancar.");
+    } finally {
+      setIsLoadingLearnData(false);
+    }
   };
 
   const handleSelectJuz = (juz) => {
@@ -222,8 +239,18 @@ function App() {
         );
 
       case 'learn':
-        // Jika belum ada surah/juz yang dipilih, tampilkan pesan.
-        // Namun, untuk menjaga fungsionalitas, kita fallback ke MOCK_QURAN jika diakses langsung.
+        // Tampilkan loading spinner saat data sedang diambil dari API
+        if (isLoadingLearnData) {
+          return (
+             <div className="p-4 pb-24 flex items-center justify-center h-full min-h-[400px]">
+               <div className="flex flex-col items-center space-y-4">
+                 <div className="w-12 h-12 border-4 border-green-100 border-t-green-600 rounded-full animate-spin"></div>
+                 <p className="text-gray-500 font-bold text-sm">Mengunduh ayat dari Kemenag...</p>
+               </div>
+             </div>
+          );
+        }
+
         const currentLearnData = selectedLearnItem ? selectedLearnItem.data : MOCK_QURAN;
         const { surah, surahNumber = 1, ayat_range, text } = currentLearnData;
 
