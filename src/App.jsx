@@ -180,7 +180,7 @@ function App() {
     }
 
     try {
-      const GAS_URL = "https://script.google.com/macros/s/AKfycbzLerX6dYlezsODXvL7nVlAhBptM8r0ncxLZCtMw3T4dhD_YfnGKhcDTZwQ7-Dpled4/exec";
+      const GAS_URL = "https://script.google.com/macros/s/AKfycbwqmsSLXdyZxLHAI76DkCLQqs0LpgadjdFL1qMMLpUtkRd5nNTwTDXyvV2gn4C-0WBk/exec";
 
       const response = await fetch(GAS_URL, {
         method: 'POST',
