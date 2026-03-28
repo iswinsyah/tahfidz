@@ -1,7 +1,7 @@
 // Komponen Utama Aplikasi At Tahfidz
 import React, { useState, useRef, useEffect } from 'react';
 import { 
-  Home, BookOpen, Mic, Award, User, Heart, Share2, Play, Pause, Search,
+  Home, BookOpen, Mic, Award, User, Heart, Share2, Play, Pause, Search, Download,
   CheckCircle, AlertCircle, Star, Bell, Settings, DollarSign,
   ChevronRight, Volume2, MessageCircle, X, List
 } from 'lucide-react';
@@ -69,6 +69,31 @@ function App() {
     newAudio.onerror = () => { alert("Maaf, audio belum tersedia untuk ayat ini."); setIsPlayingAudio(false); setPlayingAyah(null); };
     
     newAudio.play();
+  };
+
+  const handleDownloadAyah = async (surahNum, ayahNum, e) => {
+    e.stopPropagation(); // Mencegah ayat ter-play saat tombol download diklik
+    
+    const surahStr = String(surahNum).padStart(3, '0');
+    const ayahStr = String(ayahNum).padStart(3, '0');
+    const audioUrl = `https://everyayah.com/data/${selectedQari}/${surahStr}${ayahStr}.mp3`;
+
+    try {
+      // Menggunakan fetch untuk memaksa browser mendownload file mp3 (bukan sekedar membuka tab)
+      const response = await fetch(audioUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Surah_${surahStr}_Ayat_${ayahStr}.mp3`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      // Fallback: Jika terblokir oleh keamanan browser, buka di tab baru agar bisa disave manual
+      window.open(audioUrl, '_blank');
+    }
   };
 
   const handleStartSetoran = () => {
@@ -249,9 +274,14 @@ function App() {
                     className={`space-y-3 p-4 rounded-2xl cursor-pointer transition-all border ${playingAyah === item.id ? 'bg-green-50 border-green-200 shadow-sm' : 'bg-transparent border-transparent hover:bg-gray-50'}`}
                   >
                     <div className="flex items-start gap-4 justify-between">
-                      <button className={`mt-2 shrink-0 p-2 rounded-full ${playingAyah === item.id ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-400 hover:text-green-600'}`}>
-                         {playingAyah === item.id ? <Volume2 size={16} className="animate-pulse" /> : <Play size={16} />}
-                      </button>
+                      <div className="flex flex-col gap-2 mt-2 shrink-0">
+                        <button className={`p-2 rounded-full ${playingAyah === item.id ? 'bg-green-600 text-white shadow-md' : 'bg-gray-100 text-gray-400 hover:text-green-600'}`}>
+                           {playingAyah === item.id ? <Volume2 size={16} className="animate-pulse" /> : <Play size={16} />}
+                        </button>
+                        <button onClick={(e) => handleDownloadAyah(surahNumber, item.id, e)} className="p-2 rounded-full bg-blue-50 text-blue-500 hover:text-blue-700 hover:bg-blue-100 transition-colors shadow-sm" title="Download MP3">
+                           <Download size={14} />
+                        </button>
+                      </div>
                       <p className="text-right text-3xl leading-loose font-serif text-gray-800" dir="rtl">
                         {item.arabic} <span className="text-green-600 font-sans text-xl">﴿{item.id}﴾</span>
                       </p>
