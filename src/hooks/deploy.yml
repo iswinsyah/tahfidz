@@ -1,0 +1,34 @@
+name: Deploy to Hostinger
+
+on:
+  push: # Pemicu workflow
+    branches: [ main ] # Hanya berjalan saat ada push ke branch 'main'
+  workflow_dispatch: # Memungkinkan trigger manual dari halaman Actions
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 1. Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: 2. Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18' # Menggunakan Node.js versi 18
+
+      - name: 3. Install Dependencies & Build Application
+        run: |
+          npm install
+          npm run build
+
+      - name: 4. Deploy to Hostinger via FTP
+        uses: SamKirkland/FTP-Deploy-Action@4.3.3
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          # Direktori sumber di runner GitHub (hasil build Vite)
+          local-dir: ./dist/
+          # Direktori tujuan di server Hostinger (root untuk domain utama)
+          server-dir: public_html/
