@@ -184,11 +184,18 @@ function App() {
 
       const response = await fetch(GAS_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Wajib text/plain agar lolos CORS GAS
+        // Hapus headers sama sekali agar browser otomatis memakai standard text/plain murni
+        // Ini ampuh 100% untuk menghindari blokir Preflight CORS dari sistem Google
         body: JSON.stringify({ targetText, transcript })
       });
 
-      const result = await response.json();
+      const textResponse = await response.text();
+      let result;
+      try {
+        result = JSON.parse(textResponse);
+      } catch (e) {
+        throw new Error("Balasan GAS bukan JSON (Biasanya karena salah setting Akses): " + textResponse.substring(0, 50));
+      }
 
       setScore(result.score);
       setAiNote(result.note);
@@ -198,9 +205,9 @@ function App() {
         setTimeout(() => setShowSedekah(true), 1500);
       }
     } catch (err) {
-      // Fallback jika gagal konek ke GAS/Internet mati
-      setScore(70);
-      setAiNote("Koneksi ke Ustadz AI terputus. Silakan periksa jaringan internet bos.");
+      // Tampilkan pesan error aslinya agar kita tahu penyebab pastinya
+      setScore(0);
+      setAiNote("Error Sistem: " + err.message + " | Cek setingan GAS bos (Pilih Execute as: Me, Access: Anyone).");
       setSessionState('result');
     }
   };
