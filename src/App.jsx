@@ -39,6 +39,7 @@ function App() {
   const [isSpeakingNote, setIsSpeakingNote] = useState(false); // Indikator TTS Ustadz sedang bicara
   const [isCopied, setIsCopied] = useState(false); // Indikator copy hasil
   const [isAutoplay, setIsAutoplay] = useState(false); // Indikator putar berurutan
+  const [isMushafMode, setIsMushafMode] = useState(false); // Toggle mode mushaf
   const playlistRef = useRef([]); // Ref untuk menyimpan daftar putar
 
   const { transcript, isListening, startListening, stopListening, error } = useQuranSpeech();
@@ -415,6 +416,23 @@ function App() {
                 </button>
               </div>
               
+              <div className="flex justify-center mb-2 mt-4">
+                <div className="flex bg-gray-100 p-1 rounded-xl w-full">
+                  <button 
+                    onClick={() => setIsMushafMode(false)}
+                    className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${!isMushafMode ? 'bg-white text-green-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    Mode Terjemah
+                  </button>
+                  <button 
+                    onClick={() => setIsMushafMode(true)}
+                    className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${isMushafMode ? 'bg-white text-green-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    Mode Mushaf
+                  </button>
+                </div>
+              </div>
+
               {/* Filter Rentang Ayat (Khusus Mode Surah) */}
               {(!selectedLearnItem || selectedLearnItem.type === 'surah') && (
                 <div className="flex items-center justify-between bg-green-50/50 p-3 rounded-xl border border-green-100 mb-2">
@@ -449,30 +467,46 @@ function App() {
                 </div>
               )}
 
-              <div className="space-y-8 py-2">
-                {displayedText.map(item => (
-                  <div 
-                    key={item.id} 
-                    onClick={() => handlePlayAyah(surahNumber, item.id)}
-                    className={`space-y-3 p-4 rounded-2xl cursor-pointer transition-all border ${playingAyah === item.id ? 'bg-green-50 border-green-200 shadow-sm' : 'bg-transparent border-transparent hover:bg-gray-50'}`}
-                  >
-                    <div className="flex items-start gap-4 justify-between">
-                      <div className="flex flex-col gap-2 mt-2 shrink-0">
-                        <button className={`p-2 rounded-full ${playingAyah === item.id ? 'bg-green-600 text-white shadow-md' : 'bg-gray-100 text-gray-400 hover:text-green-600'}`}>
-                           {playingAyah === item.id ? <Volume2 size={16} className="animate-pulse" /> : <Play size={16} />}
-                        </button>
-                        <button onClick={(e) => handleDownloadAyah(surahNumber, item.id, e)} className="p-2 rounded-full bg-blue-50 text-blue-500 hover:text-blue-700 hover:bg-blue-100 transition-colors shadow-sm" title="Download MP3">
-                           <Download size={14} />
-                        </button>
+              {isMushafMode ? (
+                <div className="py-4 px-2" dir="rtl">
+                  <p className="text-[28px] leading-[2.5] font-serif text-gray-800 text-right" style={{ wordSpacing: '2px' }}>
+                    {displayedText.map(item => (
+                      <span 
+                        key={item.id} 
+                        onClick={() => handlePlayAyah(surahNumber, item.id)}
+                        className={`cursor-pointer transition-colors p-1 rounded-lg ${playingAyah === item.id ? 'bg-green-100 text-green-800 shadow-sm' : 'hover:bg-gray-50'}`}
+                      >
+                        {item.arabic} <span className="text-green-600 font-sans text-xl mx-1 select-none">﴿{item.id}﴾</span>
+                      </span>
+                    ))}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-8 py-2">
+                  {displayedText.map(item => (
+                    <div 
+                      key={item.id} 
+                      onClick={() => handlePlayAyah(surahNumber, item.id)}
+                      className={`space-y-3 p-4 rounded-2xl cursor-pointer transition-all border ${playingAyah === item.id ? 'bg-green-50 border-green-200 shadow-sm' : 'bg-transparent border-transparent hover:bg-gray-50'}`}
+                    >
+                      <div className="flex items-start gap-4 justify-between">
+                        <div className="flex flex-col gap-2 mt-2 shrink-0">
+                          <button className={`p-2 rounded-full ${playingAyah === item.id ? 'bg-green-600 text-white shadow-md' : 'bg-gray-100 text-gray-400 hover:text-green-600'}`}>
+                             {playingAyah === item.id ? <Volume2 size={16} className="animate-pulse" /> : <Play size={16} />}
+                          </button>
+                          <button onClick={(e) => handleDownloadAyah(surahNumber, item.id, e)} className="p-2 rounded-full bg-blue-50 text-blue-500 hover:text-blue-700 hover:bg-blue-100 transition-colors shadow-sm" title="Download MP3">
+                             <Download size={14} />
+                          </button>
+                        </div>
+                        <p className="text-right text-3xl leading-loose font-serif text-gray-800" dir="rtl">
+                          {item.arabic} <span className="text-green-600 font-sans text-xl">﴿{item.id}﴾</span>
+                        </p>
                       </div>
-                      <p className="text-right text-3xl leading-loose font-serif text-gray-800" dir="rtl">
-                        {item.arabic} <span className="text-green-600 font-sans text-xl">﴿{item.id}﴾</span>
-                      </p>
+                      <p className="text-xs text-gray-500 leading-relaxed font-medium italic bg-white p-3 rounded-xl border border-gray-100">{item.indo}</p>
                     </div>
-                    <p className="text-xs text-gray-500 leading-relaxed font-medium italic bg-white p-3 rounded-xl border border-gray-100">{item.indo}</p>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex gap-3">
