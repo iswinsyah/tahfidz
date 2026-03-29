@@ -19,20 +19,30 @@ export const useQuranSpeech = () => {
     }
 
     const recognition = new SpeechRecognition();
-    recognition.continuous = true; 
-    // Nyalakan kembali interim agar UI terasa responsif, logika baru kita kebal terhadap stuttering
+    // KUNCI: continuous HARUS false di Android agar memori mesin tidak menumpuk/mengulang
+    recognition.continuous = false; 
     recognition.interimResults = true; 
     recognition.lang = 'ar-SA'; // Bahasa Arab
 
     recognition.onresult = (event) => {
-      let currentSessionText = '';
-      // Selalu susun ulang dari 0 untuk menghindari bug duplikasi di browser HP
-      for (let i = 0; i < event.results.length; i++) {
-        currentSessionText += event.results[i][0].transcript + ' ';
+      let interim = '';
+      let final = '';
+
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          final += event.results[i][0].transcript + ' ';
+        } else {
+          interim += event.results[i][0].transcript + ' ';
+        }
       }
-      currentTranscriptRef.current = currentSessionText;
       
-      // Gabungkan memori teks lama dengan yang baru
+      if (final !== '') {
+        previousTranscriptRef.current += ' ' + final.trim();
+        currentTranscriptRef.current = ''; 
+      } else {
+        currentTranscriptRef.current = interim;
+      }
+      
       setTranscript((previousTranscriptRef.current + ' ' + currentTranscriptRef.current).trim());
     };
 
@@ -52,11 +62,16 @@ export const useQuranSpeech = () => {
         }
         currentTranscriptRef.current = ''; // Kosongkan sesi saat ini
         
-        try {
-          recognition.start();
-        } catch(e) {
-          setIsListening(false);
-        }
+        // Jeda sangat singkat (50ms) sebelum restart agar mesin browser HP tidak crash
+        setTimeout(() => {
+          if (!isManualStopRef.current && recognitionRef.current) {
+            try {
+              recognitionRef.current.start();
+            } catch(e) {
+              setIsListening(false);
+            }
+          }
+        }, 50);
       } else {
         setIsListening(false);
       }
