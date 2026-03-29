@@ -75,24 +75,3 @@ export const useQuranSpeech = () => {
 
   return { transcript, isListening, startListening, stopListening, error };
 };
-    setTranscript('');
-    setError(null);
-    if (recognitionRef.current) {
-      try {
-        recognitionRef.current.start();
-        setIsListening(true);
-      } catch (e) {
-        console.error("Mic sudah aktif atau error:", e);
-      }
-    }
-  };
-
-  const stopListening = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-      setIsListening(false);
-    }
-  };
-
-  return { transcript, isListening, startListening, stopListening, error };
-};
