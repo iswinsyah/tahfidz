@@ -61,8 +61,17 @@ function doPost(e) {
     const payload = {
       "contents": [{ "parts": parts }],
       "generationConfig": {
-        "temperature": 0.2, 
-        "responseMimeType": "application/json" 
+        "temperature": 0.2,
+        "responseMimeType": "application/json",
+        "responseSchema": {
+          "type": "OBJECT",
+          "properties": {
+            "ai_heard": { "type": "STRING", "description": "Tuliskan persis apa yang Anda dengar dari audio. Jika hening/kosong tulis 'Kosong'." },
+            "score": { "type": "INTEGER" },
+            "note": { "type": "STRING" }
+          },
+          "required": ["ai_heard", "score", "note"]
+        }
       }
     };
 

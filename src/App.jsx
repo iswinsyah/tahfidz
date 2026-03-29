@@ -285,7 +285,7 @@ function App() {
 
       setScore(result.score);
       // Tampilkan apa yang sebenarnya didengar AI untuk evaluasi kita
-      const aiHeardText = result.ai_heard ? `[AI Mendengar: "${result.ai_heard}"]\n\n` : '';
+      const aiHeardText = result.ai_heard !== undefined ? `[AI Mendengar: "${result.ai_heard}"]\n\n` : `[⚠️ PERINGATAN BUGS: Server yang merespon ini adalah server versi lama! Coba periksa URL GAS bos.]\n\n`;
       setAiNote(aiHeardText + result.note);
       setSessionState('result');
 
