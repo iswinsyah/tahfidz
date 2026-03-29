@@ -868,7 +868,7 @@ function App() {
   };
 
   return (
-    <div className="max-w-md mx-auto h-[800px] bg-gray-50 shadow-2xl rounded-[3.5rem] border-[12px] border-gray-900 overflow-hidden relative font-sans flex flex-col text-gray-800 select-none">
+    <div className="max-w-md mx-auto h-[800px] bg-yellow-50 shadow-2xl rounded-[3.5rem] border-[12px] border-gray-900 overflow-hidden relative font-sans flex flex-col text-gray-800 select-none">
       {/* iOS Style Status Bar */}
       <div className="bg-white h-12 flex justify-between px-10 items-end pb-2 text-[12px] font-bold">
         <span>9:41</span>
@@ -880,7 +880,7 @@ function App() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto bg-gray-50">
+      <div className="flex-1 overflow-y-auto bg-yellow-50">
         {renderTabContent()}
       </div>
 
