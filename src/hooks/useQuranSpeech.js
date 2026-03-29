@@ -10,8 +10,17 @@ export const useQuranSpeech = () => {
 
   const startListening = async () => {
     setError(null);
-    setTranscript('🎙️ Sedang merekam suara (Mode Premium AI)...');
+    setTranscript('⏳ Meminta izin akses mikrofon...');
     audioChunksRef.current = [];
+
+    // Cek apakah web diakses lewat HTTP (Bukan HTTPS)
+    if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+      const msg = "Akses Mikrofon diblokir. Anda wajib membuka web ini menggunakan awalan HTTPS://";
+      alert(msg);
+      setError(msg);
+      setTranscript('Akses Mikrofon Diblokir (Harus HTTPS) ❌');
+      return;
+    }
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -37,8 +46,22 @@ export const useQuranSpeech = () => {
 
       mediaRecorder.start();
       setIsListening(true);
+      setTranscript('🎙️ Sedang merekam suara (Mode Premium AI)...');
     } catch (err) {
-      setError('Akses microphone ditolak atau error. Detail: ' + err.message);
+      console.error("Mic error:", err);
+      let errMsg = "Gagal mengakses mikrofon. ";
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+         errMsg += "Izin ditolak. Silakan klik ikon gembok (🔒) di sebelah URL bar Chrome Anda, lalu izinkan akses mikrofon.";
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+         errMsg += "Tidak ada mikrofon yang terdeteksi di perangkat ini.";
+      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+         errMsg += "Mikrofon sedang digunakan oleh aplikasi lain.";
+      } else {
+         errMsg += "Detail: " + err.message;
+      }
+      alert(errMsg);
+      setError(errMsg);
+      setTranscript('Gagal mengakses mikrofon ❌');
       setIsListening(false);
     }
   };

@@ -183,10 +183,6 @@ function App() {
   };
 
   const handleStartSetoran = () => {
-    if (error) {
-      alert(error);
-      return;
-    }
     setSessionState('recording');
     startListening();
   };
@@ -256,9 +252,8 @@ function App() {
 
     // Jika mic batal/gagal menangkap suara
     if (!audioData || !audioData.audioBase64) {
-      setScore(0);
-      setAiNote("Tidak ada suara yang terdeteksi. Pastikan mic berfungsi dan silakan coba lagi.");
-      setSessionState('result');
+      setSessionState('idle');
+      alert("Rekaman dibatalkan atau mikrofon terblokir. Silakan coba lagi.");
       return;
     }
 
