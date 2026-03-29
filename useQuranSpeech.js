@@ -6,6 +6,8 @@ export const useQuranSpeech = () => {
   const [error, setError] = useState(null);
   
   const recognitionRef = useRef(null);
+  const isManualStopRef = useRef(false); // Deteksi apakah user menekan tombol Berhenti
+  const fullTranscriptRef = useRef(''); // Akumulasi teks yang stabil
 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -17,25 +19,38 @@ export const useQuranSpeech = () => {
 
     const recognition = new SpeechRecognition();
     recognition.continuous = true; 
-    recognition.interimResults = true; 
+    // Matikan interim agar tidak ada kata yang menumpuk/mengulang (stuttering)
+    recognition.interimResults = false; 
     recognition.lang = 'ar-SA'; // Bahasa Arab
 
     recognition.onresult = (event) => {
-      let currentTranscript = '';
-      for (let i = 0; i < event.results.length; i++) {
-        currentTranscript += event.results[i][0].transcript;
+      let currentChunk = '';
+      // Hanya ambil blok kata yang baru dan sudah final
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        currentChunk += event.results[i][0].transcript + ' ';
       }
-      setTranscript(currentTranscript);
+      fullTranscriptRef.current += currentChunk;
+      setTranscript(fullTranscriptRef.current.trim());
     };
 
     recognition.onerror = (event) => {
-      console.error('Speech recognition error', event.error);
-      setError(event.error);
-      setIsListening(false);
+      if (event.error !== 'no-speech') {
+        console.error('Speech recognition error', event.error);
+        setError(event.error);
+      }
     };
 
     recognition.onend = () => {
-      setIsListening(false);
+      // Jika mic mati sendiri (karena jeda napas) padahal user belum tekan "Berhenti", hidupkan lagi!
+      if (!isManualStopRef.current) {
+        try {
+          recognition.start();
+        } catch(e) {
+          setIsListening(false);
+        }
+      } else {
+        setIsListening(false);
+      }
     };
 
     recognitionRef.current = recognition;
@@ -43,7 +58,9 @@ export const useQuranSpeech = () => {
 
   const startListening = () => {
     setTranscript('');
+    fullTranscriptRef.current = '';
     setError(null);
+    isManualStopRef.current = false;
     if (recognitionRef.current) {
       try {
         recognitionRef.current.start();
@@ -55,6 +72,7 @@ export const useQuranSpeech = () => {
   };
 
   const stopListening = () => {
+    isManualStopRef.current = true;
     if (recognitionRef.current) {
       recognitionRef.current.stop();
       setIsListening(false);
