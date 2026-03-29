@@ -71,7 +71,8 @@ export const useQuranSpeech = () => {
     return new Promise((resolve) => {
       if (mediaRecorderRef.current && isListening) {
         mediaRecorderRef.current.onstop = () => {
-          const mimeType = mediaRecorderRef.current.mimeType || 'audio/webm';
+          // Bersihkan tipe format agar sesuai standar Google Gemini (misal: "audio/webm;codecs=opus" jadi "audio/webm")
+          const mimeType = (mediaRecorderRef.current.mimeType || 'audio/webm').split(';')[0];
           // Bungkus pecahan audio menjadi 1 file utuh
           const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
           
@@ -86,7 +87,7 @@ export const useQuranSpeech = () => {
               streamRef.current.getTracks().forEach(track => track.stop());
             }
             
-            resolve({ audioBase64: base64String, audioMimeType: mimeType });
+            resolve({ audioBase64: base64String, audioMimeType: mimeType, size: audioBlob.size });
           };
         };
 

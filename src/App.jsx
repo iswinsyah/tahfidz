@@ -250,10 +250,10 @@ function App() {
       .filter(t => t.id >= ayahStart && t.id <= ayahEnd)
       .map(t => t.arabic).join(" ");
 
-    // Jika mic batal/gagal menangkap suara
-    if (!audioData || !audioData.audioBase64) {
+    // Jika mic batal/gagal menangkap suara, atau file rekaman ternyata kosong (< 500 bytes)
+    if (!audioData || !audioData.audioBase64 || audioData.size < 500) {
       setSessionState('idle');
-      alert("Rekaman dibatalkan atau mikrofon terblokir. Silakan coba lagi.");
+      alert("Rekaman kosong atau mikrofon tidak menangkap suara. Pastikan Anda sudah berbicara setelah memencet tombol mulai.");
       return;
     }
 
